@@ -1,5 +1,51 @@
 import numpy as np
 
+THRESHOLD = 500000
+LEARNING_RATE = 0.01
+
+def update_weights(data, weights, target):
+    dw = np.zeros(weights.shape)
+    for i in range(dw.shape[0]):
+        total = 0
+        for d in range(data.shape[0]):
+            total += (target[d]-np.dot(weights,data[d,:]))*(data[d,i])
+        dw[i] = total
+    return weights + LEARNING_RATE*dw
+
+def mean_squared_error(data,weights,pred):
+    total = 0
+    for i in range(data.shape[0]):
+        total += (np.dot(weights,data[i,:]) - pred[i])**2
+    return total/data.shape[0]
+
+def perceptron(data, weights, target):
+    old_error = mean_squared_error(data,weights,target)
+    new_error = 10000
+    while(np.abs(old_error-new_error) > 0.00001):
+        weights = update_weights(data,weights,target)
+        old_error = new_error
+        new_error = mean_squared_error(data,weights,target)
+    return weights
+
+def accuracy(data, weights, target):
+    prediction = np.zeros(target.shape[0])
+    for i in range(data.shape[0]):
+        d = data[i,:]
+        if(np.dot(weights,d) > 0):
+            prediction[i] = 1
+        else:
+            prediction[i] = -1
+    tp = 0
+    tn = 0
+    fp = 0
+    fn = 0
+    for i in range(len(prediction)):
+        if(prediction[i] == 1 and target[i] == 1):
+            tp += 1
+        if(prediction[i] == -1 and target[i] == -1):
+            tn += 1
+    return (tp+tn)/len(target)
+
 f = open('housing_prices.txt','r')
 lines = f.readlines()
 f.close()
@@ -39,15 +85,19 @@ city = temp_city
 
 # Rows are examples and columns are features
 # Final feature in the column in the price (what were trying to predict)
-data = np.array([np.ones(sqft.shape[0]),sqft,city,bedrooms,baths])
+data = np.array([np.ones(sqft.shape[0]),sqft,city,bedrooms,baths,price])
 data = np.transpose(data)
-target = np.array(price)
+target = np.zeros(data.shape[0])
+for i in range(data.shape[0]):
+    if(data[i,5] > THRESHOLD):
+        target[i] = 1
+    else:
+        target[i] = -1
 
 # Normalize all the data so it is between 0 and 1
+max_price = np.amax(price)
 for i in range(data.shape[1]):
     data[:,i] = data[:,i]/np.amax(data[:,i])
-max_target = np.amax(target)
-target = target/np.amax(target)
 
 # Initialize weights to zero
 weights = np.zeros(data.shape[1])
@@ -73,3 +123,10 @@ for i in range(data.shape[0]):
         testing_data[testing_count,:] = data[i,:]
         testing_target[testing_count] = target[i]
         testing_count += 1
+
+
+weights = perceptron(training_data,weights,training_target)
+train_acc = accuracy(training_data,weights,training_target)
+test_acc = accuracy(testing_data,weights,testing_target)
+print("The training accuracy was: %f" % (train_acc))
+print("The testing accuracy was:  %f" % (test_acc))
