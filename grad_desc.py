@@ -1,13 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-LEARNING_RATE = 0.01
+LEARNING_RATE = 0.001
 
-def mean_squared_error(data,weights,pred):
+def mean_squared_error(data,weights,pred,min_pred,max_pred):
     total = 0
     for i in range(data.shape[0]):
-        total += (np.dot(weights,data[i,:]) - pred[i])**2
-    return total/data.shape[0]
+        diff = np.dot(weights,data[i,:]) - pred[i]
+        total += (diff)**2
+        #scaled_diff = diff*(max_pred-min_pred) + min_pred
+        #total += (scaled_diff)**2
+    return (total/data.shape[0])
 
 def update_weights(data, weights, target):
     dw = np.zeros(weights.shape)
@@ -62,10 +65,14 @@ data = np.transpose(data)
 target = np.array(price)
 
 # Normalize all the data so it is between 0 and 1
-for i in range(data.shape[1]):
-    data[:,i] = data[:,i]/np.amax(data[:,i])
+for i in range(1,data.shape[1]):
+    minimum = np.amin(data[:,i])
+    maximum = np.amax(data[:,i])
+    data[:,i] = (data[:,i]-minimum)/(maximum-minimum)
+
+min_target = np.amin(target)
 max_target = np.amax(target)
-target = target/np.amax(target)
+target = (target-min_target)/(max_target-min_target)
 
 # Initialize weights semi-randomly
 weights = np.random.rand(data.shape[1])
@@ -95,12 +102,13 @@ for i in range(data.shape[0]):
 
 
 # TRAINING PART
-n = 10000
+n = 20000
 errors = np.zeros(n)
 
 for i in range(n):
     weights = update_weights(training_data,weights,training_target)
-    errors[i] = mean_squared_error(training_data,weights,training_target)
 
-print("The mean squared training error is: %f" % (mean_squared_error(training_data,weights,training_target)*max_target))
-print("The mean squared testing error is:  %f" % (mean_squared_error(testing_data,weights,testing_target)*max_target))
+# rescale both before calculating the errors
+
+print("The mean squared training error is: %f" % (mean_squared_error(training_data,weights,training_target,min_target,max_target)))
+print("The mean squared testing error is:  %f" % (mean_squared_error(testing_data,weights,testing_target,min_target,max_target)))

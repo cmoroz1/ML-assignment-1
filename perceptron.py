@@ -1,6 +1,6 @@
 import numpy as np
 
-THRESHOLD = 500000
+THRESHOLD = 408000 #THIS IS THE MEDIAN OF THE DATA
 LEARNING_RATE = 0.01
 
 def update_weights(data, weights, target):
@@ -21,7 +21,7 @@ def mean_squared_error(data,weights,pred):
 def perceptron(data, weights, target):
     old_error = mean_squared_error(data,weights,target)
     new_error = 10000
-    while(np.abs(old_error-new_error) > 0.00001):
+    while(np.abs(old_error-new_error) > 0.0001):
         weights = update_weights(data,weights,target)
         old_error = new_error
         new_error = mean_squared_error(data,weights,target)
@@ -87,6 +87,9 @@ city = temp_city
 # Final feature in the column in the price (what were trying to predict)
 data = np.array([np.ones(sqft.shape[0]),sqft,city,bedrooms,baths,price])
 data = np.transpose(data)
+
+#print("MEDIAN IS %f" % (np.median(data[:,5])))
+
 target = np.zeros(data.shape[0])
 for i in range(data.shape[0]):
     if(data[i,5] > THRESHOLD):
