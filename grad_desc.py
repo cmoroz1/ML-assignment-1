@@ -9,7 +9,7 @@ def mean_squared_error(data,weights,pred,min_pred,max_pred):
         diff = np.dot(weights,data[i,:]) - pred[i]
         total += (diff)**2
         #scaled_diff = diff*(max_pred-min_pred) + min_pred
-        #total += (scaled_diff)**2
+        #total += np.abs(scaled_diff)
     return (total/data.shape[0])
 
 # Updates weights using Gradient Descent Algorithm
