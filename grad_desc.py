@@ -12,6 +12,7 @@ def mean_squared_error(data,weights,pred,min_pred,max_pred):
         #total += (scaled_diff)**2
     return (total/data.shape[0])
 
+# Updates weights using Gradient Descent Algorithm
 def update_weights(data, weights, target):
     dw = np.zeros(weights.shape)
     for i in range(dw.shape[0]):
@@ -21,24 +22,29 @@ def update_weights(data, weights, target):
         dw[i] = total
     return weights - LEARNING_RATE*dw
 
+# Open data file and read in all the data
 f = open('housing_prices.txt','r')
 lines = f.readlines()
 f.close()
 
+# Get rid of all the tabs and new lines inbetween data
 for i in range(len(lines)):
     if '\n' in lines[i]:
         lines[i] = lines[i][:-1]
     lines[i] = lines[i].split('\t')
 
+# The labels are the first row and the data is the rest of the file
 labels = lines[0]
 all_data = lines[1:]
 
+# Initialize empty numpy arrays
 sqft = np.zeros(len(all_data))
 price = np.zeros(len(all_data))
 city = []
 bedrooms = np.zeros(len(all_data))
 baths = np.zeros(len(all_data))
 
+# Put data into numpy arrays
 for i in range(len(all_data)):
     row = all_data[i]
     sqft[i] = float(row[0])
@@ -47,6 +53,7 @@ for i in range(len(all_data)):
     bedrooms[i] = float(row[3])
     baths[i] = float(row[4])
 
+# Converts the cities to numbers, where each new city gets a new number
 d = {}
 count = 1
 temp_city = np.zeros(len(city))
@@ -70,6 +77,7 @@ for i in range(1,data.shape[1]):
     maximum = np.amax(data[:,i])
     data[:,i] = (data[:,i]-minimum)/(maximum-minimum)
 
+# Save the min and max target (may be needed later?)
 min_target = np.amin(target)
 max_target = np.amax(target)
 target = (target-min_target)/(max_target-min_target)
@@ -103,12 +111,18 @@ for i in range(data.shape[0]):
 
 # TRAINING PART
 n = 20000
-errors = np.zeros(n)
+# errors_train = np.zeros(n)
+# errors_test = np.zeros(n)
 
 for i in range(n):
     weights = update_weights(training_data,weights,training_target)
+    # errors_train[i] = mean_squared_error(training_data,weights,training_target,min_target,max_target)
+    # errors_test[i] = mean_squared_error(testing_data,weights,testing_target,min_target,max_target)
 
-# rescale both before calculating the errors
+# plt.plot(errors_train)
+# plt.plot(errors_test)
+# plt.legend(['training error','testing error'])
+# plt.show()
 
 print("The mean squared training error is: %f" % (mean_squared_error(training_data,weights,training_target,min_target,max_target)))
 print("The mean squared testing error is:  %f" % (mean_squared_error(testing_data,weights,testing_target,min_target,max_target)))
